@@ -1,0 +1,584 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "generate_data",
+            "description": "Install `uv` if not already installed, and run the data generation script with the user's email as an argument.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "User's email address (used as an argument for the script)."
+                    }
+                },
+                "required": [
+                    "email"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "format_file",
+            "description": "Format a file using prettier",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": "string",
+                        "description": "File path to format"
+                    }
+                },
+                "required": [
+                    "source"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "count_weekday",
+            "description": "Count the occurrences of a specific weekday in a text file",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "weekday": {
+                        "type": "string",
+                        "description": "Day of the week (in English)"
+                    },
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the source file. If unavailable, set to null.",
+                        "nullable": true
+                    },
+                    "destination": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the destination file. If unavailable, set to null.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "weekday",
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "sort_contacts",
+            "description": "Sort a contact list by first or last name",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "order": {
+                        "type": "string",
+                        "description": "Sorting order, based on name",
+                        "enum": [
+                            "last_name",
+                            "first_name"
+                        ]
+                    },
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the source file. If unavailable, set to null.",
+                        "nullable": true
+                    },
+                    "destination": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the destination file. If unavailable, set to null.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "order",
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_recent_logs",
+            "description": "Write the first line of the most recent log files",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "description": "Number of log files to include"
+                    },
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the directory containing log files. If unavailable, set to null.",
+                        "nullable": true
+                    },
+                    "destination": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the destination file. If unavailable, set to null.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "count",
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "extract_markdown_titles",
+            "description": "Extract titles from Markdown (.md) files in a directory",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the directory containing Markdown files. If unavailable, set to null.",
+                        "nullable": true
+                    },
+                    "destination": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the destination file. If unavailable, set to null.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "extract_email_sender",
+            "description": "Extract the sender's email address from an email message file",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the source file. If unavailable, set to null.",
+                        "nullable": true
+                    },
+                    "destination": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the destination file. If unavailable, set to null.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "extract_credit_card_number",
+            "description": "Extract a 16-digit credit card number from an image",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the source image file. If unavailable, set to null.",
+                        "nullable": true
+                    },
+                    "destination": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the destination file. If unavailable, set to null.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "find_similar_comments",
+            "description": "Find the most similar pair of comments from source using embeddings and write them to destination, one per line.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the source file. If unavailable, set to null.",
+                        "nullable": true
+                    },
+                    "destination": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Path to the destination file. If unavailable, set to null.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculate_ticket_sales",
+            "description": "Compute the total sales for a given ticket type from an SQLite database and write the total to an output file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "database": {
+                        "type": "string",
+                        "description": "Path to the SQLite database file containing ticket sales data."
+                    },
+                    "ticket_type": {
+                        "type": "string",
+                        "description": "The ticket type for which total sales should be calculated."
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Path to the output file where the total sales amount should be written."
+                    }
+                },
+                "required": [
+                    "database",
+                    "ticket_type",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "fetch_api_data",
+            "description": "Request an API and return the response",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "API endpoint to fetch data from"
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Path to the destination file to save the output",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "url",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_operation",
+            "description": "Perform clone and commit Git operations",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "repo_url": {
+                        "type": "string",
+                        "description": "URL to the Git repository"
+                    },
+                    "operation": {
+                        "type": "string",
+                        "description": "Git operation to perform",
+                        "enum": [
+                            "clone",
+                            "commit"
+                        ]
+                    },
+                    "message": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Commit message (only for commit operation)",
+                        "nullable": true
+                    },
+                    "file_to_edit": {
+                        "type": "string",
+                        "description": "File name that have to edit",
+                        "nullable": true
+                    },
+                    "new_content": {
+                        "type": "string",
+                        "description": "New content of the file",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "repo_url",
+                    "operation",
+                    "message",
+                    "file_to_edit",
+                    "new_content"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "execute_sql_query",
+            "description": "Run a SQL query on a database",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "db_type": {
+                        "type": "string",
+                        "description": "Database type",
+                        "enum": [
+                            "sqlite",
+                            "duckdb"
+                        ]
+                    },
+                    "db_file": {
+                        "type": "string",
+                        "description": "Database file path"
+                    },
+                    "query": {
+                        "type": "string",
+                        "description": "SQL query to execute"
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Path to the destination file to save the output.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "db_type",
+                    "db_file",
+                    "query",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "scrape_website",
+            "description": "Scrape a webpage and extract text content",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "Webpage URL to scrape"
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Path to the destination file to save the output"
+                    }
+                },
+                "required": [
+                    "url",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "process_image",
+            "description": "Compress or resize an image file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": "string",
+                        "description": "Path to the source image file."
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Path to save the processed image."
+                    },
+                    "action": {
+                        "type": "string",
+                        "description": "Specify 'compress' to reduce file size or 'resize' to change dimensions.",
+                        "enum": [
+                            "compress",
+                            "resize"
+                        ]
+                    },
+                    "width": {
+                        "type": "integer",
+                        "description": "New width for resizing (required if action is 'resize').",
+                        "nullable": true
+                    },
+                    "height": {
+                        "type": "integer",
+                        "description": "New height for resizing (required if action is 'resize').",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "source",
+                    "destination",
+                    "action",
+                    "width",
+                    "height"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "transcribe_audio",
+            "description": "Transcribe speech from an MP3 audio file into text.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": "string",
+                        "description": "Path to the MP3 file containing audio."
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Path to save the transcribed text.",
+                        "nullable": true
+                    },
+                    "language": {
+                        "type": "string",
+                        "description": "Language code (e.g., 'en' for English, 'es' for Spanish).",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "source",
+                    "destination",
+                    "language"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "convert_markdown_to_html",
+            "description": "Convert a Markdown (.md) file into an HTML file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": "string",
+                        "description": "Path to the Markdown file."
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Path to save the generated HTML file.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "source",
+                    "destination"
+                ],
+                "additionalProperties": false
+            },
+            "strict": true
+        }
+    }
+]
