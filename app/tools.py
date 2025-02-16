@@ -1,24 +1,21 @@
 from .utils import (
     DAY_NAMES, normalize_weekday, file_rename, collect_markdown_titles,
-    validate_file_path
+    validate_file_path, encode_image, cosine_similarity
 )
 from app import DATA_DIR
-from .ai_calls import get_chat_completions, get_embeddings
+from app.ai_calls import get_chat_completions, get_embeddings
 from fastapi import HTTPException
 from dateutil import parser
 from bs4 import BeautifulSoup
 from PIL import Image
-from torch import cosine_similarity
 import speech_recognition as sr
 import os
 import subprocess
-import easyocr
 import requests
 import sqlite3
 import duckdb
-import markdown
+import markdown2
 import json
-import re
 
 def generate_data(email):
     try:
@@ -237,20 +234,26 @@ def extract_credit_card_number(source: str = None, destination: str = None):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image file not found")
 
-    # Taking more time
-    reader = easyocr.Reader(["en"])
-    results = reader.readtext(file_path, detail=0)
+    image_data = encode_image(source)
 
-    extracted_text = "\n".join(results)
-    extracted_text = re.sub(r"[- ]+", "", extracted_text)
-    matches = re.findall(
-        r"\b(?:4\d{12}(?:\d{3})?|5[1-5]\d{14}|3[47]\d{13}|6(?:011|5\d{2})\d{12}|3(?:0[0-5]|[68]\d)\d{11}|(?:2131|1800|35\d{3})\d{11})\b",
-        extracted_text,
-    )
-
-    extracted_number = (
-        matches[0] if (matches and len(matches) > 0) else "No credit card number found"
-    )
+    messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "There is 8 or more digit number is there in this image, with space after every 4 digit, only extract the those digit number without spaces and return just the number without any other characters",
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{image_data}"},
+                    },
+                ],
+            }
+        ]
+    
+    response = get_chat_completions(messages)
+    extracted_number = response["content"].replace(" ", "")
 
     with open(output_path, "w") as f:
         f.write(extracted_number)
@@ -265,35 +268,35 @@ def extract_credit_card_number(source: str = None, destination: str = None):
 
 def find_similar_comments(source: str = None, destination: str = None):
     if not source:
-        raise HTTPException(status_code=400, detail="Source file is required")
+        raise ValueError("Source file is required")
 
-    file_path: str = source
-    output_path: str = destination or file_rename(file_path, "-similar.txt")
+    file_path = source
+    output_path = destination or file_rename(file_path, "-similar.txt")
 
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File not found")
+        raise FileNotFoundError("File not found")
 
-    # Load comments
     with open(file_path, "r", encoding="utf-8") as f:
         comments = [line.strip() for line in f.readlines()]
 
-    # Compute embeddings
     embeddings = [get_embeddings(comment) for comment in comments]
 
-    # Find the most similar pair
-    max_sim = -1
-    most_similar_pair = (None, None)
+    most_similar_pair = max(
+        (
+            (
+                comments[i],
+                comments[j],
+                cosine_similarity(embeddings[i], embeddings[j]),
+            )
+            for i in range(len(comments))
+            for j in range(i + 1, len(comments))
+        ),
+        key=lambda x: x[2],
+        default=(None, None, -1),
+    )
 
-    for i in range(len(comments)):
-        for j in range(i + 1, len(comments)):
-            sim = cosine_similarity(embeddings[i], embeddings[j])
-            if sim > max_sim:
-                max_sim = sim
-                most_similar_pair = (comments[i], comments[j])
-
-    # Write the most similar pair to output file
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(most_similar_pair))
+        f.write("\n".join(most_similar_pair[:2]))
 
     return {
         "message": "Similar comments extracted",
@@ -301,6 +304,8 @@ def find_similar_comments(source: str = None, destination: str = None):
         "destination": output_path,
         "status": "success",
     }
+
+
 
 def calculate_ticket_sales(database, ticket_type, destination):
     db_path = os.path.join(DATA_DIR, database)
@@ -330,11 +335,20 @@ def fetch_api_data(url, destination = None):
         if destination:
             with open(destination, "w") as f:
                 f.write(response.text)
-            return f"API data saved to {destination}"
+
+            message = f"API data saved to {destination}",
+
         else:
-            return f"API data:\n\n{response.text}"
+            message = f"API data:\n\n{response.text}",
     else:
-        return f"API request failed with status code {response.status_code}"
+        raise HTTPException(status_code=500, detail="API request failed")
+    
+    return {
+        "message": message,
+        "source": url,
+        "destination": destination,
+        "status": "success"
+    }
 
 def git_operation(repo_url, operation, message=None, file_to_edit=None, new_content=None):
     """Clones a git repo, optionally modifies a file, and commits the change."""
@@ -351,9 +365,16 @@ def git_operation(repo_url, operation, message=None, file_to_edit=None, new_cont
         else:
             raise ValueError("Missing parameters! Check: commit message, file to edit and new content.")
         
-        return f"Repo {repo_name} cloned and modified."
+        message = f"Repo {repo_name} cloned and modified.",
 
-    return f"Repo {repo_name} cloned."
+    message = f"Repo {repo_name} cloned.",
+
+    return {
+        "message": message,
+        "source": repo_url,
+        "operation": operation,
+        "status": "success"
+    }
 
 def run_sql_query(db_type, db_file, query, destination=None):
     """Executes a SQL query on SQLite or DuckDB and saves the results."""
@@ -374,7 +395,11 @@ def run_sql_query(db_type, db_file, query, destination=None):
         json.dump(results, f)
 
     conn.close()
-    return f"SQL query executed and saved to {destination}"
+
+    return {
+        "message": f"SQL query executed and saved to {destination}",
+        "status": "success"
+    }
 
 def scrape_website(url, destination=None):
     """Scrapes a website and extracts text content."""
@@ -386,9 +411,16 @@ def scrape_website(url, destination=None):
         with open(destination, "w") as f:
             f.write(text_content)
 
-        return f"Website data saved to {destination}"
-    
-    return f"Below is the text content of the website:\n\n{text_content}"
+        message = f"Website data saved.",
+
+    message = f"Below is the text content of the website:\n\n{text_content}",
+
+    return {
+        "message": message,
+        "source": url,
+        "destination": destination,
+        "status": "success"
+    }
     
 def process_image(source: str, destination: str, action: str, width: int = None, height: int = None):
     validate_file_path(source)
@@ -401,6 +433,14 @@ def process_image(source: str, destination: str, action: str, width: int = None,
         img.save(destination)
     else:
         raise ValueError("Invalid action or missing dimensions.")
+    
+    return {
+        "message": "Image processed successfully.",
+        "source": source,
+        "destination": destination,
+        "action": action,
+        "status": "success"
+    }
 
 def transcribe_audio(source: str, destination: str, language: str = "en"):
     recognizer = sr.Recognizer()
@@ -412,9 +452,17 @@ def transcribe_audio(source: str, destination: str, language: str = "en"):
         with open(destination, "w") as file:
             file.write(text)
 
-        return f"Transcription saved to {destination}"
-    
-    return text
+        message = f"Transcription saved to {destination}",
+
+    message = f"Below is the transcription:\n\n{text}",
+
+    return {
+        "message": message,
+        "source": source,
+        "destination": destination,
+        "language": language,
+        "status": "success"
+    }
 
 def convert_markdown_to_html(source, destination=None):
     """Converts a Markdown file to HTML."""
@@ -422,12 +470,19 @@ def convert_markdown_to_html(source, destination=None):
     with open(source, "r") as f:
         md_content = f.read()
 
-    html_content = markdown.markdown(md_content)
+    html_content = markdown2.markdown(md_content)
 
     if destination:
         with open(destination, "w") as f:
             f.write(html_content)
         
-        return f"Markdown converted to HTML and saved to {destination}"
+        message = f"Markdown converted to HTML."
     
-    return html_content
+    message = html_content
+
+    return {
+        "message": message,
+        "source": source,
+        "destination": destination,
+        "status": "success"
+    }

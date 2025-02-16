@@ -1,6 +1,8 @@
 import re
 import json
 import os
+import base64
+import numpy as np
 
 DAY_NAMES = [
     "Monday",
@@ -51,7 +53,6 @@ def normalize_weekday(weekday):
 
     raise ValueError("Invalid weekday input")
 
-
 def collect_markdown_titles(directory: str, index: dict):
     for root, _, files in os.walk(directory):
         for file in files:
@@ -60,11 +61,19 @@ def collect_markdown_titles(directory: str, index: dict):
                 with open(file_path, "r") as f:
                     title = None
                     for line in f:
-                        if line.startswith("# "):
-                            title = line[2:].strip()
+                        if line.strip().startswith("#"):
+                            title = line.strip().lstrip("#").strip()
                             break
 
                     if title:
                         relative_path = os.path.relpath(file_path, directory)
                         relative_path = re.sub(r"[\\/]+", "/", relative_path)
                         index[relative_path] = title
+
+# Read the image file and encode it as base64
+def encode_image(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
+    
+def cosine_similarity(vec1, vec2):
+    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))

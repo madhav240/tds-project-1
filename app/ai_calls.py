@@ -1,12 +1,9 @@
 from fastapi import HTTPException
 import json
 import httpx
-import os
+from app import AI_URL, AI_TOKEN, AI_MODEL, AI_EMBEDDINGS_MODEL
+from app.utils import encode_image
 
-AI_TOKEN = os.getenv("AIPROXY_TOKEN")
-AI_URL = "https://aiproxy.sanand.workers.dev/openai/v1"
-AI_MODEL = "gpt-4o-mini"
-AI_EMBEDDINGS_MODEL = "text-embedding-3-small"
 
 with open("./tools.json", "r") as file:
     tools = json.load(file)
